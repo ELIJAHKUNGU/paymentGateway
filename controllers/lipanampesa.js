@@ -90,9 +90,10 @@ exports.initiateStkPush = async (req, res) => {
 exports.stkPushCallback = async(req, res) => {
     try {
         const { orderId } = req.params;
-        console.log("Req:", req)
-        console.log("Req:", req?.body)
 
+        // Log callback received
+        console.log(`Callback received for orderId: ${orderId}`);
+        console.log("Callback Body:", JSON.stringify(req.body, null, 2));
 
         // Validate callback data structure
         const validation = safaricomService.validateCallbackData(req.body);
