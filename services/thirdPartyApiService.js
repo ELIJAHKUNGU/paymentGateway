@@ -137,13 +137,7 @@ class ThirdPartyApiService {
             }
         };
 
-        // Add Safaricom specific data if available
-        if (transaction.merchantRequestId) {
-            basePayload.data.merchantRequestId = transaction.merchantRequestId;
-        }
-        if (transaction.checkoutRequestId) {
-            basePayload.data.checkoutRequestId = transaction.checkoutRequestId;
-        }
+        // Note: merchantRequestId and checkoutRequestId are excluded from client notifications
         if (transaction.mpesaReceiptNumber) {
             basePayload.data.mpesaReceiptNumber = transaction.mpesaReceiptNumber;
         }

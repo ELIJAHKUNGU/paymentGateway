@@ -62,8 +62,6 @@ Client Request → Gateway → STK Push → Safaricom → Customer → Payment R
     "phoneNumber": "254743770216",
     "bankName": "Equity Bank",
     "accountReference": "ACC123",
-    "merchantRequestId": "abc123-def456",
-    "checkoutRequestId": "ws_CO_22092025101645123456789",
     "mpesaReceiptNumber": "TIM6U59GL8",
     "transactionDate": "20250922101645",
     "resultCode": "0",
@@ -92,8 +90,6 @@ Client Request → Gateway → STK Push → Safaricom → Customer → Payment R
     "phoneNumber": "254743770216",
     "bankName": "Equity Bank",
     "accountReference": "ACC123",
-    "merchantRequestId": "abc123-def456",
-    "checkoutRequestId": "ws_CO_22092025101645123456789",
     "resultCode": "1032",
     "resultDescription": "Request Cancelled by user",
     "eventType": "payment_callback_received",
@@ -386,6 +382,11 @@ app.post('/webhook', (req, res) => {
 Use the test endpoints for development:
 
 ```bash
+# Simple test endpoint (basic connectivity test)
+curl -X POST http://localhost:4001/api/v1/test-callback-sending/test \
+  -H "Content-Type: application/json" \
+  -d '{"test": "data"}'
+
 # Create test transaction
 curl -X POST http://localhost:4001/api/v1/test-callback-sending/create-test-transaction \
   -H "Content-Type: application/json" \
@@ -399,6 +400,13 @@ curl -X POST http://localhost:4001/api/v1/test-callback-sending/send-webhook/TES
   -H "Content-Type: application/json" \
   -d '{"eventType": "payment_initiated"}'
 ```
+
+#### Test Endpoints Available:
+- `POST /api/v1/test-callback-sending/test` - Simple echo endpoint for basic testing
+- `POST /api/v1/test-callback-sending/create-test-transaction` - Create test transaction
+- `POST /api/v1/test-callback-sending/send-webhook/:orderId` - Send test webhook
+- `GET /api/v1/test-callback-sending/webhook-queue-status` - Check queue status
+- `POST /api/v1/test-callback-sending/receive-webhook` - Test webhook receiver
 
 ## Troubleshooting
 

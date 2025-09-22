@@ -28,9 +28,7 @@ exports.postThirdPartyApi = async (data) => {
                 bankName: transaction.bankName,
                 accountReference: transaction.accountReference,
                 
-                // Safaricom specific data (if available)
-                merchantRequestId: transaction.merchantRequestId || null,
-                checkoutRequestId: transaction.checkoutRequestId || null,
+                // Note: merchantRequestId and checkoutRequestId are excluded from client notifications
                 mpesaReceiptNumber: transaction.mpesaReceiptNumber || null,
                 transactionDate: transaction.transactionDate || null,
                 resultCode: transaction.callbackResultCode || null,
