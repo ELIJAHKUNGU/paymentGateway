@@ -125,9 +125,9 @@ class TransactionService {
             
             // Determine final status based on result code
             let finalStatus = 'failed';
-            if (ResultCode === '0') {
+            if (ResultCode === 0 || ResultCode === '0') {
                 finalStatus = 'completed';
-            } else if (ResultCode === '1032') {
+            } else if (ResultCode === 1032 || ResultCode === '1032') {
                 finalStatus = 'timeout';
             }
 
@@ -174,7 +174,17 @@ class TransactionService {
             // Send final status notification to client if callback URL is provided
             if (updatedTransaction.callbackUrl) {
                 try {
-                    await thirdPartyApiService.postPaymentCompletion(updatedTransaction, callbackData);
+                    // Prepare webhook data with fresh callback information
+                    const webhookData = {
+                        eventType: 'payment_callback_received',
+                        callbackReceived: true,
+                        finalStatus: finalStatus,
+                        safaricomResultCode: ResultCode,
+                        safaricomResultDesc: ResultDesc, // Use fresh ResultDesc from callback
+                        processedAt: new Date().toISOString()
+                    };
+                    
+                    await thirdPartyApiService.postThirdPartyApi(updatedTransaction, webhookData);
                     console.log(`Final payment status notification sent to client for transaction ${orderId}`);
                 } catch (error) {
                     console.error(`Failed to send final payment notification for ${orderId}:`, error.message);
