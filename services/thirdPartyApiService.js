@@ -112,7 +112,16 @@ class ThirdPartyApiService {
         if (additionalData.eventType === 'payment_initiated') {
             eventType = 'payment.initiated';
         } else if (additionalData.eventType === 'payment_callback_received') {
-            eventType = 'payment.completed';
+            // Use actual transaction status to determine event type
+            if (transaction.status === 'completed') {
+                eventType = 'payment.completed';
+            } else if (transaction.status === 'failed') {
+                eventType = 'payment.failed';
+            } else if (transaction.status === 'timeout') {
+                eventType = 'payment.timeout';
+            } else {
+                eventType = 'payment.status_updated';
+            }
         } else if (transaction.status === 'completed') {
             eventType = 'payment.completed';
         } else if (transaction.status === 'failed') {
@@ -147,7 +156,10 @@ class ThirdPartyApiService {
         if (transaction.callbackResultCode) {
             basePayload.data.resultCode = transaction.callbackResultCode;
         }
-        if (transaction.callbackResultDesc) {
+        // Use the most recent result description from additional data or transaction
+        if (additionalData.safaricomResultDesc) {
+            basePayload.data.resultDescription = additionalData.safaricomResultDesc;
+        } else if (transaction.callbackResultDesc) {
             basePayload.data.resultDescription = transaction.callbackResultDesc;
         }
 
