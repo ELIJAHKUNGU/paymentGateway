@@ -62,6 +62,13 @@ exports.initiateStkPush = async (req, res) => {
             });
         }
         
+        if (error.message.includes('already exists')) {
+            return res.status(409).json({
+                message: 'Duplicate transaction',
+                error: error.message
+            });
+        }
+        
         if (error.message.includes('Safaricom API')) {
             return res.status(502).json({
                 message: 'Payment service error',
@@ -83,6 +90,9 @@ exports.initiateStkPush = async (req, res) => {
 exports.stkPushCallback = async(req, res) => {
     try {
         const { orderId } = req.params;
+        console.log("Req:", req)
+        console.log("Req:", req?.body)
+
 
         // Validate callback data structure
         const validation = safaricomService.validateCallbackData(req.body);

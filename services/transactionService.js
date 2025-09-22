@@ -9,6 +9,12 @@ class TransactionService {
         try {
             const { bankName, ...otherData } = transactionData;
             
+            // Check if transaction with orderId already exists
+            const existingTransaction = await GatewayTransaction.findOne({ orderId: otherData.orderId });
+            if (existingTransaction) {
+                throw new Error(`Transaction with orderId '${otherData.orderId}' already exists`);
+            }
+            
             // Get paybill for the bank
             const paybill = getBanksPaybill(bankName);
             
@@ -25,6 +31,12 @@ class TransactionService {
             return savedTransaction;
         } catch (error) {
             console.error('Error creating transaction:', error.message);
+            
+            // Handle MongoDB duplicate key error
+            if (error.code === 11000 || error.message.includes('E11000')) {
+                throw new Error(`Transaction with orderId '${transactionData.orderId}' already exists`);
+            }
+            
             throw new Error(`Failed to create transaction: ${error.message}`);
         }
     }

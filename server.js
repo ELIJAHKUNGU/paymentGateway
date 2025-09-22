@@ -71,7 +71,7 @@ app.get('/health', async (req, res) => {
         res.status(200).json({ 
             status: 'healthy', 
             timestamp: new Date().toISOString(),
-            database: dbHealth
+            // database: dbHealth
         });
     } catch (error) {
         res.status(503).json({

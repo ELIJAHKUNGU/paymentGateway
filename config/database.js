@@ -78,9 +78,9 @@ const checkDBHealth = async () => {
         return {
             status: states[state] || 'Unknown',
             readyState: state,
-            host: mongoose.connection.host,
-            port: mongoose.connection.port,
-            name: mongoose.connection.name,
+            host:"Payment Gateway",
+            // port: mongoose.connection.port,
+            name: "Payment Gateway",
             collections: Object.keys(mongoose.connection.collections).length
         };
     } catch (error) {
