@@ -1,17 +1,36 @@
 const transactionService = require('../services/transactionService');
 const bankService = require('../services/bankService');
 const safaricomService = require('../services/safaricomService');
+const webhookNotificationService = require('../services/webhookNotificationService');
 
 exports.initiateStkPush = async (req, res) => {
     try {
         // Input validation
-        const { phoneNumber, amount, orderId, bankName, accountReference } = req.body;
+        const { phoneNumber, amount, orderId, bankName, accountReference, callbackUrl } = req.body;
         
         if (!phoneNumber || !amount || !orderId || !bankName || !accountReference) {
             return res.status(400).json({
                 message: 'Missing required fields',
                 required: ['phoneNumber', 'amount', 'orderId', 'bankName', 'accountReference']
             });
+        }
+
+        // Validate callbackUrl if provided (optional field for client notifications)
+        if (callbackUrl) {
+            try {
+                const url = new URL(callbackUrl);
+                if (!['http:', 'https:'].includes(url.protocol)) {
+                    return res.status(400).json({
+                        message: 'Invalid callback URL',
+                        error: 'Callback URL must use HTTP or HTTPS protocol'
+                    });
+                }
+            } catch (error) {
+                return res.status(400).json({
+                    message: 'Invalid callback URL', 
+                    error: 'Callback URL must be a valid URL'
+                });
+            }
         }
 
         // Validate bank exists
@@ -29,6 +48,7 @@ exports.initiateStkPush = async (req, res) => {
             amount,
             bankName,
             accountReference,
+            callbackUrl, // Client's callback URL for notifications
             timestamp: require("../utils/timestamp").getTimestamp(),
             businessShortCode: process.env.safaricombusinessShortCode,
             clientIp: req.ip || req.connection.remoteAddress,
@@ -96,7 +116,9 @@ exports.stkPushCallback = async(req, res) => {
         console.log("Callback Body:", JSON.stringify(req.body, null, 2));
 
         // Validate callback data structure
+        console.log('About to validate callback data...');
         const validation = safaricomService.validateCallbackData(req.body);
+        console.log('Validation result:', validation);
         if (!validation.isValid) {
             return res.status(400).json({
                 message: 'Invalid callback data',
@@ -268,6 +290,52 @@ exports.getTransactionStats = async (req, res) => {
         console.error("Error retrieving statistics:", error);
         res.status(500).json({
             message: 'Error retrieving statistics',
+            error: error.message
+        });
+    }
+};
+
+// Manually retry webhook notification for a transaction
+exports.retryWebhookNotification = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        
+        const result = await webhookNotificationService.retryWebhookNotification(orderId);
+        
+        res.status(200).json({
+            message: 'Webhook notification retry initiated',
+            data: result
+        });
+    } catch (error) {
+        console.error("Error retrying webhook notification:", error.message);
+        
+        if (error.message.includes('not found')) {
+            return res.status(404).json({
+                message: 'Transaction not found',
+                orderId: req.params.orderId
+            });
+        }
+        
+        res.status(500).json({
+            message: 'Error retrying webhook notification',
+            error: error.message
+        });
+    }
+};
+
+// Get webhook notification queue statistics
+exports.getWebhookStats = async (req, res) => {
+    try {
+        const stats = webhookNotificationService.getQueueStats();
+        
+        res.status(200).json({
+            message: 'Webhook queue statistics retrieved',
+            data: stats
+        });
+    } catch (error) {
+        console.error("Error retrieving webhook stats:", error);
+        res.status(500).json({
+            message: 'Error retrieving webhook statistics',
             error: error.message
         });
     }

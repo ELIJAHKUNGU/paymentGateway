@@ -71,7 +71,7 @@ app.get('/health', async (req, res) => {
         res.status(200).json({ 
             status: 'healthy', 
             timestamp: new Date().toISOString(),
-            // database: dbHealth
+            database: dbHealth
         });
     } catch (error) {
         res.status(503).json({
@@ -84,6 +84,10 @@ app.get('/health', async (req, res) => {
 
 // Apply stricter rate limiting to payment routes
 app.use('/api/v1/init-payment', paymentLimiter);
+
+// Test routes for webhook callback testing
+app.use('/api/v1/test-callback-sending', require('./routes/testRoutes'));
+
 
 // Load routes
 app.use('/api/v1', require('./routes/lipampesaRoutes'));

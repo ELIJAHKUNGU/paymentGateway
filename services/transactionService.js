@@ -1,6 +1,7 @@
 const GatewayTransaction = require('../models/GatewayTransaction');
 const { getBanksPaybill } = require('./bankService');
 const { initiateStkPushRequest, confirmPaymentRequest } = require('./safaricomService');
+const thirdPartyApiService = require('./thirdPartyApiService');
 
 class TransactionService {
     
@@ -58,6 +59,17 @@ class TransactionService {
                 transaction.orderId, 
                 stkResponse
             );
+            
+            // 4. Send immediate notification to client about STK push initiation
+            if (updatedTransaction.callbackUrl) {
+                try {
+                    await thirdPartyApiService.postPaymentInitiation(updatedTransaction, stkResponse);
+                    console.log(`Payment initiation notification sent to client for transaction ${updatedTransaction.orderId}`);
+                } catch (error) {
+                    console.error(`Failed to send payment initiation notification for ${updatedTransaction.orderId}:`, error.message);
+                    // Don't throw error, continue with the flow
+                }
+            }
             
             return {
                 transaction: updatedTransaction,
@@ -158,6 +170,18 @@ class TransactionService {
             }
 
             console.log(`Callback processed for transaction ${orderId}. Final status: ${finalStatus}`);
+            
+            // Send final status notification to client if callback URL is provided
+            if (updatedTransaction.callbackUrl) {
+                try {
+                    await thirdPartyApiService.postPaymentCompletion(updatedTransaction, callbackData);
+                    console.log(`Final payment status notification sent to client for transaction ${orderId}`);
+                } catch (error) {
+                    console.error(`Failed to send final payment notification for ${orderId}:`, error.message);
+                    // Don't throw error, log it in transaction
+                }
+            }
+            
             return updatedTransaction;
         } catch (error) {
             console.error('Error processing callback:', error.message);

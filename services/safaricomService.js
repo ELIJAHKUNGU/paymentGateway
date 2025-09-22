@@ -137,11 +137,22 @@ class SafaricomService {
     // Validate callback data structure
     validateCallbackData(callbackData) {
         try {
-            const { stkCallback } = callbackData;
+            console.log('Validating callback data:', JSON.stringify(callbackData, null, 2));
+            
+            // Handle nested structure: check for stkCallback at root or in Body
+            let stkCallback = callbackData.stkCallback;
+            
+            if (!stkCallback && callbackData.Body) {
+                console.log('Found Body wrapper, extracting stkCallback');
+                stkCallback = callbackData.Body.stkCallback;
+            }
             
             if (!stkCallback) {
+                console.log('Available keys:', Object.keys(callbackData));
                 throw new Error('Missing stkCallback in request body');
             }
+            
+            console.log('stkCallback found:', JSON.stringify(stkCallback, null, 2));
 
             const {
                 MerchantRequestID,

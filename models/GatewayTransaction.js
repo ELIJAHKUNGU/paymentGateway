@@ -35,6 +35,23 @@ const gatewayTransactionSchema = new mongoose.Schema({
         type: String,
         default: 'Payment for Order'
     },
+    // Client Notification URL (where we'll send webhook notifications)
+    callbackUrl: {
+        type: String,
+        default: null,
+        validate: {
+            validator: function(url) {
+                if (!url) return true; // Optional field
+                try {
+                    const parsedUrl = new URL(url);
+                    return ['http:', 'https:'].includes(parsedUrl.protocol);
+                } catch {
+                    return false;
+                }
+            },
+            message: 'Client callback URL must be a valid HTTP or HTTPS URL'
+        }
+    },
     
     // Safaricom Request Data
     businessShortCode: {
@@ -117,6 +134,29 @@ const gatewayTransactionSchema = new mongoose.Schema({
         default: null
     },
     rawCallbackData: {
+        type: mongoose.Schema.Types.Mixed,
+        default: null
+    },
+    
+    // Webhook Notification Data
+    webhookNotified: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
+    webhookAttempts: {
+        type: Number,
+        default: 0
+    },
+    webhookLastAttempt: {
+        type: Date,
+        default: null
+    },
+    webhookSuccessful: {
+        type: Boolean,
+        default: false
+    },
+    webhookResponse: {
         type: mongoose.Schema.Types.Mixed,
         default: null
     },
