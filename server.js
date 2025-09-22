@@ -87,6 +87,10 @@ app.use('/api/v1/init-payment', paymentLimiter);
 
 // Test routes for webhook callback testing
 app.use('/api/v1/test-callback-sending', require('./routes/testRoutes'));
+app.post("/api/v1/test-callback-sending/test", (req, res) => {
+    console.log("Working", req.body)
+    res.status(200).json({message:"Received", status:"Success", data:req.body})
+})
 
 
 // Load routes
