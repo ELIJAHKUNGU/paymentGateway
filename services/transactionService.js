@@ -174,13 +174,17 @@ class TransactionService {
             // Send final status notification to client if callback URL is provided
             if (updatedTransaction.callbackUrl) {
                 try {
+                    // Get user-friendly description using the same mapping as console logs
+                    const safaricomService = require('./safaricomService');
+                    const userFriendlyDesc = safaricomService.getTransactionStatusDescription(ResultCode);
+                    
                     // Prepare webhook data with fresh callback information
                     const webhookData = {
                         eventType: 'payment_callback_received',
                         callbackReceived: true,
                         finalStatus: finalStatus,
                         safaricomResultCode: ResultCode,
-                        safaricomResultDesc: ResultDesc, // Use fresh ResultDesc from callback
+                        safaricomResultDesc: userFriendlyDesc, // Use user-friendly description
                         processedAt: new Date().toISOString()
                     };
                     
