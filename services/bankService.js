@@ -33,8 +33,8 @@ class BankService {
         try {
             const banks = Array.from(this.bankCache.values()).map(bank => ({
                 name: bank.name,
-                ussd: bank.ussd,
-                paybill: bank.paybill
+                // ussd: bank.ussd,
+                // paybill: bank.paybill
             }));
 
             return {

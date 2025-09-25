@@ -406,6 +406,213 @@ class TransactionService {
         }
     }
 
+    // Create C2B transaction record
+    async createC2BTransaction(c2bData) {
+        try {
+            const {
+                mpesaTransactionId,
+                transactionType,
+                amount,
+                phoneNumber,
+                businessShortCode,
+                billRefNumber,
+                accountBalance,
+                thirdPartyTransId,
+                customerName,
+                transactionTime,
+                rawData
+            } = c2bData;
+
+            // Check if transaction with mpesaTransactionId already exists
+            const existingTransaction = await GatewayTransaction.findOne({ 
+                mpesaTransactionId: mpesaTransactionId 
+            });
+            
+            if (existingTransaction) {
+                console.log(`C2B Transaction with mpesaTransactionId '${mpesaTransactionId}' already exists`);
+                return existingTransaction;
+            }
+
+            // Create C2B transaction record
+            const transaction = new GatewayTransaction({
+                orderId: `C2B_${mpesaTransactionId}_${Date.now()}`, // Generate unique orderId for C2B
+                mpesaTransactionId: mpesaTransactionId,
+                phoneNumber: phoneNumber,
+                amount: amount,
+                bankName: 'C2B_DIRECT', // Special bank name for C2B transactions
+                paybill: businessShortCode,
+                accountReference: billRefNumber || 'C2B_PAYMENT',
+                status: 'completed', // C2B confirmations are already completed payments
+                paymentMethod: 'c2b',
+                transactionType: transactionType, // 'Pay Bill' or 'Buy Goods'
+                businessShortCode: businessShortCode,
+                billRefNumber: billRefNumber,
+                accountBalance: accountBalance,
+                thirdPartyTransId: thirdPartyTransId,
+                customerName: customerName,
+                transactionTime: transactionTime,
+                callbackReceived: true,
+                callbackReceivedAt: new Date(),
+                callbackResultCode: '0',
+                callbackResultDesc: 'C2B Payment Completed',
+                rawCallbackData: rawData,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+
+            const savedTransaction = await transaction.save();
+            console.log(`C2B Transaction ${savedTransaction.orderId} saved to database`);
+            
+            return savedTransaction;
+
+        } catch (error) {
+            console.error('Error creating C2B transaction:', error.message);
+            
+            // Handle MongoDB duplicate key error
+            if (error.code === 11000 || error.message.includes('E11000')) {
+                throw new Error(`C2B Transaction with mpesaTransactionId '${c2bData.mpesaTransactionId}' already exists`);
+            }
+            
+            throw new Error(`Failed to create C2B transaction: ${error.message}`);
+        }
+    }
+
+    // Get C2B transactions with filtering
+    async getC2BTransactions(options = {}) {
+        try {
+            const {
+                page = 1,
+                limit = 50,
+                phoneNumber = null,
+                businessShortCode = null,
+                transactionType = null,
+                fromDate = null,
+                toDate = null
+            } = options;
+
+            // Build query for C2B transactions
+            const query = {
+                paymentMethod: 'c2b' // Filter for C2B transactions only
+            };
+            
+            if (phoneNumber) query.phoneNumber = phoneNumber;
+            if (businessShortCode) query.businessShortCode = businessShortCode;
+            if (transactionType) query.transactionType = transactionType;
+            
+            if (fromDate || toDate) {
+                query.createdAt = {};
+                if (fromDate) query.createdAt.$gte = new Date(fromDate);
+                if (toDate) query.createdAt.$lte = new Date(toDate);
+            }
+
+            // Execute query with pagination
+            const skip = (page - 1) * limit;
+            
+            const [transactions, total] = await Promise.all([
+                GatewayTransaction.find(query)
+                    .select('-rawStkResponse -rawCallbackData -processingErrors')
+                    .sort({ createdAt: -1 })
+                    .skip(skip)
+                    .limit(limit)
+                    .lean(),
+                GatewayTransaction.countDocuments(query)
+            ]);
+
+            return {
+                data: transactions,
+                pagination: {
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total / limit),
+                    hasNextPage: page < Math.ceil(total / limit),
+                    hasPrevPage: page > 1
+                }
+            };
+
+        } catch (error) {
+            console.error('Error retrieving C2B transactions:', error.message);
+            throw error;
+        }
+    }
+
+    // Get C2B transaction statistics
+    async getC2BStats() {
+        try {
+            const c2bQuery = { paymentMethod: 'c2b' };
+            
+            const [
+                totalC2BTransactions,
+                totalC2BAmount,
+                todayC2BCount,
+                weekC2BCount,
+                payBillCount,
+                buyGoodsCount,
+                recentC2BTransactions
+            ] = await Promise.all([
+                // Total C2B transactions
+                GatewayTransaction.countDocuments(c2bQuery),
+                
+                // Total C2B amount
+                GatewayTransaction.aggregate([
+                    { $match: c2bQuery },
+                    { $group: { _id: null, total: { $sum: '$amount' } } }
+                ]).then(result => result[0]?.total || 0),
+                
+                // Today's C2B transactions
+                GatewayTransaction.countDocuments({
+                    ...c2bQuery,
+                    createdAt: {
+                        $gte: new Date(new Date().setHours(0, 0, 0, 0))
+                    }
+                }),
+                
+                // This week's C2B transactions
+                GatewayTransaction.countDocuments({
+                    ...c2bQuery,
+                    createdAt: {
+                        $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    }
+                }),
+                
+                // Pay Bill transactions
+                GatewayTransaction.countDocuments({
+                    ...c2bQuery,
+                    transactionType: 'Pay Bill'
+                }),
+                
+                // Buy Goods transactions
+                GatewayTransaction.countDocuments({
+                    ...c2bQuery,
+                    transactionType: 'Buy Goods'
+                }),
+                
+                // Recent C2B activity
+                GatewayTransaction.find(c2bQuery)
+                    .select('orderId mpesaTransactionId amount phoneNumber transactionType businessShortCode createdAt')
+                    .sort({ createdAt: -1 })
+                    .limit(10)
+                    .lean()
+            ]);
+
+            return {
+                totalTransactions: totalC2BTransactions,
+                totalAmount: totalC2BAmount,
+                todayTransactions: todayC2BCount,
+                weekTransactions: weekC2BCount,
+                transactionTypes: {
+                    payBill: payBillCount,
+                    buyGoods: buyGoodsCount
+                },
+                recentActivity: recentC2BTransactions
+            };
+
+        } catch (error) {
+            console.error('Error retrieving C2B statistics:', error.message);
+            throw error;
+        }
+    }
+
     // Health check for transaction operations
     async healthCheck() {
         try {

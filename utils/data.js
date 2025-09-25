@@ -1,8 +1,18 @@
 const banksPayBills = [
     {
-        "bankName": "KCB",
+        "bankName": "NCBA",
+        "ussd": "*488#",
+        "paybill": 880100
+    },
+    {
+        "bankName": "LOOP",
+        "ussd": "*488#",
+        "paybill": 714888
+    },
+    {
+        "bankName": "I&M",
         "ussd": "*522#",
-        "paybill": 522522
+        "paybill": 542542
     },
     {
         "bankName": "Commercial Bank of Africa",
@@ -10,7 +20,7 @@ const banksPayBills = [
         "paybill": 880100
     },
     {
-        "bankName": "Co-operative Bank",
+        "bankName": "Coop",
         "ussd": "*667#",
         "paybill": 400200
     },
@@ -20,47 +30,42 @@ const banksPayBills = [
         "paybill": 329329
     },
     {
-        "bankName": "Barclays Bank K LTD",
+        "bankName": "ABSA",
         "ussd": "*224#",
         "paybill": 303030
     },
     {
-        "bankName": "NIC Bank Limited",
+        "bankName": "NIC",
         "ussd": "*488#",
         "paybill": 488488
     },
     {
-        "bankName": "Family Bank Ltd",
+        "bankName": "Family",
         "ussd": "*325#",
         "paybill": 222111
     },
     {
-        "bankName": "CFC Stanbic",
+        "bankName": "Stanbic",
         "ussd": "*208#",
         "paybill": 600100
     },
     {
-        "bankName": "Equity Bank",
+        "bankName": "Equity",
         "ussd": "*247#",
         "paybill": 247247
     },
     {
-        "bankName": "National Bank",
+        "bankName": "National",
         "ussd": "*625#",
         "paybill": 547700
     },
     {
-        "bankName": "Chase Bank",
+        "bankName": "Chase",
         "ussd": "*275#",
         "paybill": 552800
     },
     {
-        "bankName": "I & M Bank Limited",
-        "ussd": "*458#",
-        "paybill": 542542
-    },
-    {
-        "bankName": "Diamond Trust Bank (DTB)",
+        "bankName": "DTB",
         "ussd": "*385#",
         "paybill": 516600
     },
@@ -70,52 +75,52 @@ const banksPayBills = [
         "paybill": 700201
     },
     {
-        "bankName": "Jamii Bora Bank",
+        "bankName": "Jamii",
         "ussd": "*344#",
         "paybill": 529901
     },
     {
-        "bankName": "Imperial Bank LTD",
+        "bankName": "Imperial",
         "ussd": "*356#",
         "paybill": 800100
     },
     {
-        "bankName": "ABC Bank",
+        "bankName": "ABC",
         "ussd": "APP",
         "paybill": 111777
     },
     {
-        "bankName": "Credit Bank",
+        "bankName": "Credit",
         "ussd": "*699#",
         "paybill": 972700
     },
     {
-        "bankName": "Consolidated Bank LTD",
+        "bankName": "Consolidated",
         "ussd": "*262#",
         "paybill": 508400
     },
     {
-        "bankName": "Equatorial Commercial Bank",
+        "bankName": "Equatorial",
         "ussd": "*286#",
         "paybill": 498100
     },
     {
-        "bankName": "K-REP BANK",
+        "bankName": "K-REP",
         "ussd": "*527#",
         "paybill": 111999
     },
     {
-        "bankName": "Transnational Bank",
+        "bankName": "Transnational",
         "ussd": "*862#",
         "paybill": 862862
     },
     {
-        "bankName": "Post Office Savings Bank",
+        "bankName": "Post",
         "ussd": "*498#",
         "paybill": 200999
     },
     {
-        "bankName": "Gulf African Bank",
+        "bankName": "Gulf",
         "ussd": "*399#",
         "paybill": 985050
     },
