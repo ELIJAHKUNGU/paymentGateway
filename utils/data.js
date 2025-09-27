@@ -1,5 +1,10 @@
 const banksPayBills = [
     {
+        "bankName": "KCB",
+        "ussd": "*522#",
+        "paybill": 522522
+    },
+    {
         "bankName": "NCBA",
         "ussd": "*488#",
         "paybill": 880100
