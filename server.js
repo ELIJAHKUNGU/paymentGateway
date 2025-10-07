@@ -94,6 +94,9 @@ app.post("/api/v1/test-callback-sending/test", (req, res) => {
 
 
 // Load routes
+app.use('/api/v1/auth', require('./routes/authRoutes'));
+app.use('/api/v1/mpesa-keys', require('./routes/mpesaKeysRoutes'));
+app.use('/api/v1', require('./routes/paymentRoutes'));
 app.use('/api/v1', require('./routes/lipampesaRoutes'));
 
 
