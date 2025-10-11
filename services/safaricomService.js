@@ -158,7 +158,7 @@ class SafaricomService {
                 MerchantRequestID,
                 CheckoutRequestID,
                 ResultCode,
-                ResultDesc
+                ResultDesc,
             } = stkCallback;
 
             if (!MerchantRequestID || !CheckoutRequestID || ResultCode === undefined || !ResultDesc) {

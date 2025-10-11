@@ -47,6 +47,7 @@ class TransactionService {
         try {
             // 1. Create transaction record
             const transaction = await this.createTransaction(transactionData);
+            console.log("Trabns",transaction)
             
             // 2. Initiate STK push
             const stkResponse = await initiateStkPushRequest({
@@ -150,7 +151,9 @@ class TransactionService {
                 };
 
                 updateData.mpesaReceiptNumber = findMetadataValue('MpesaReceiptNumber');
+                updateData.mpesaReference = findMetadataValue('MpesaReceiptNumber'); // Save as mpesaReference too
                 updateData.transactionDate = findMetadataValue('TransactionDate');
+                console.log("MPESA Reference", updateData.mpesaReference )
                 
                 // Verify amount matches
                 const callbackAmount = findMetadataValue('Amount');
@@ -185,8 +188,12 @@ class TransactionService {
                         finalStatus: finalStatus,
                         safaricomResultCode: ResultCode,
                         safaricomResultDesc: userFriendlyDesc, // Use user-friendly description
-                        processedAt: new Date().toISOString()
+                        processedAt: new Date().toISOString(),
+                        transactionReference: updateData.mpesaReference || updateData.mpesaReceiptNumber
                     };
+                    
+                    console.log("🎯 WEBHOOK DATA BEING SENT:", JSON.stringify(webhookData, null, 2));
+                    console.log("🔑 Transaction Reference being sent:", webhookData.transactionReference || 'NOT SET');
                     
                     await thirdPartyApiService.postThirdPartyApi(updatedTransaction, webhookData);
                     console.log(`Final payment status notification sent to client for transaction ${orderId}`);

@@ -15,7 +15,7 @@ const {
 } = require('../controllers/paymentController');
 
 // Import middleware
-const { authenticate } = require('../middleware/auth');
+// const { authenticate } = require('../middleware/auth');
 
 // Rate limiting for payment operations
 const paymentLimiter = rateLimit({
@@ -30,7 +30,7 @@ const paymentLimiter = rateLimit({
 });
 
 // Apply authentication to all routes
-router.use(authenticate);
+// router.use(authenticate);
 
 // Payment Methods Routes
 // @route   GET /api/v1/payment-methods

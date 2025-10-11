@@ -29,6 +29,9 @@ class ThirdPartyApiService {
             // Create payload based on transaction status and additional data
             const payload = this.createPayload(transaction, additionalData);
             
+            console.log("📋 PAYLOAD BEING SENT TO THIRD PARTY API:", JSON.stringify(payload, null, 2));
+            console.log("🔑 Transaction Reference in payload:", payload.data.transactionReference || 'NOT SET');
+            
             // Generate signature for security
             const signature = this.generateSignature(payload);
 
@@ -150,8 +153,15 @@ class ThirdPartyApiService {
         if (transaction.mpesaReceiptNumber) {
             basePayload.data.mpesaReceiptNumber = transaction.mpesaReceiptNumber;
         }
+        if (transaction.mpesaReference) {
+            basePayload.data.mpesaReference = transaction.mpesaReference;
+        }
         if (transaction.transactionDate) {
             basePayload.data.transactionDate = transaction.transactionDate;
+        }
+        // Include transactionReference from additionalData
+        if (additionalData.transactionReference) {
+            basePayload.data.transactionReference = additionalData.transactionReference;
         }
         if (transaction.callbackResultCode) {
             basePayload.data.resultCode = transaction.callbackResultCode;

@@ -113,7 +113,7 @@ exports.stkPushCallback = async(req, res) => {
 
         // Log callback received
         console.log(`Callback received for orderId: ${orderId}`);
-        console.log("Callback Body:", JSON.stringify(req.body, null, 2));
+        console.log("RAW CALLBACK DATA BEFORE DESTRUCTURING:", JSON.stringify(req.body, null, 2));
 
         // Validate callback data structure
         console.log('About to validate callback data...');
@@ -146,6 +146,7 @@ exports.stkPushCallback = async(req, res) => {
             Result Code: ${validation.data.ResultCode}
             Description: ${statusDesc}
             Final Transaction Status: ${updatedTransaction.status}
+            META DATA Reference: ${validation?.data?.CallbackMetadata}
         `);
 
         res.json({ 
