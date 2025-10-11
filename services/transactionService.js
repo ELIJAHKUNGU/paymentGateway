@@ -145,6 +145,8 @@ class TransactionService {
             if (ResultCode === '0' && callbackData.CallbackMetadata) {
                 const metadata = callbackData.CallbackMetadata.Item || [];
                 
+                console.log("🔍 CALLBACK METADATA ITEMS:", JSON.stringify(metadata, null, 2));
+                
                 const findMetadataValue = (name) => {
                     const item = metadata.find(item => item.Name === name);
                     return item ? item.Value : null;
@@ -153,7 +155,9 @@ class TransactionService {
                 updateData.mpesaReceiptNumber = findMetadataValue('MpesaReceiptNumber');
                 updateData.mpesaReference = findMetadataValue('MpesaReceiptNumber'); // Save as mpesaReference too
                 updateData.transactionDate = findMetadataValue('TransactionDate');
-                console.log("MPESA Reference", updateData.mpesaReference )
+                
+                console.log("💳 MPESA Receipt Number extracted:", updateData.mpesaReceiptNumber);
+                console.log("🔑 MPESA Reference extracted:", updateData.mpesaReference);
                 
                 // Verify amount matches
                 const callbackAmount = findMetadataValue('Amount');
@@ -194,6 +198,8 @@ class TransactionService {
                     
                     console.log("🎯 WEBHOOK DATA BEING SENT:", JSON.stringify(webhookData, null, 2));
                     console.log("🔑 Transaction Reference being sent:", webhookData.transactionReference || 'NOT SET');
+                    console.log("📄 Updated Transaction object mpesaReference:", updatedTransaction.mpesaReference || 'NOT SET');
+                    console.log("📄 Updated Transaction object mpesaReceiptNumber:", updatedTransaction.mpesaReceiptNumber || 'NOT SET');
                     
                     await thirdPartyApiService.postThirdPartyApi(updatedTransaction, webhookData);
                     console.log(`Final payment status notification sent to client for transaction ${orderId}`);

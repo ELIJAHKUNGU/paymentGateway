@@ -144,10 +144,13 @@ class ThirdPartyApiService {
                 bankName: transaction.bankName,
                 accountReference: transaction.accountReference,
                 createdAt: transaction.createdAt,
-                updatedAt: transaction.updatedAt,
-                ...additionalData
+                updatedAt: transaction.updatedAt
             }
         };
+
+        // Add additional data (excluding transactionReference to handle it separately)
+        const { transactionReference, ...otherAdditionalData } = additionalData;
+        Object.assign(basePayload.data, otherAdditionalData);
 
         // Note: merchantRequestId and checkoutRequestId are excluded from client notifications
         if (transaction.mpesaReceiptNumber) {
@@ -159,9 +162,12 @@ class ThirdPartyApiService {
         if (transaction.transactionDate) {
             basePayload.data.transactionDate = transaction.transactionDate;
         }
-        // Include transactionReference from additionalData
-        if (additionalData.transactionReference) {
-            basePayload.data.transactionReference = additionalData.transactionReference;
+        // Include transactionReference from additionalData (handle this last to ensure it's not overwritten)
+        if (transactionReference) {
+            basePayload.data.transactionReference = transactionReference;
+            console.log("✅ TransactionReference added to payload:", transactionReference);
+        } else {
+            console.log("❌ No transactionReference found in additionalData");
         }
         if (transaction.callbackResultCode) {
             basePayload.data.resultCode = transaction.callbackResultCode;
