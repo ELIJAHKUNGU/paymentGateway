@@ -142,7 +142,14 @@ class TransactionService {
             };
 
             // Add successful payment details if available
-            if (ResultCode === '0' && callbackData.CallbackMetadata) {
+            console.log("🔍 DEBUGGING CALLBACK CONDITIONS:");
+            console.log("   ResultCode:", ResultCode, "Type:", typeof ResultCode);
+            console.log("   ResultCode === '0':", ResultCode === '0');
+            console.log("   ResultCode === 0:", ResultCode === 0);
+            console.log("   callbackData.CallbackMetadata exists:", !!callbackData.CallbackMetadata);
+            console.log("   Full CallbackMetadata:", JSON.stringify(callbackData.CallbackMetadata, null, 2));
+            
+            if ((ResultCode === '0' || ResultCode === 0) && callbackData.CallbackMetadata) {
                 const metadata = callbackData.CallbackMetadata.Item || [];
                 
                 console.log("🔍 CALLBACK METADATA ITEMS:", JSON.stringify(metadata, null, 2));
